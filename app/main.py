@@ -1,18 +1,14 @@
 from fastapi import FastAPI
-from app.dbcnctn import get_connection
 from app.api.routes import router
-
-app.include_router(router)   #real endpoints
+from app.dbcnctn import test_connection
 
 app = FastAPI()
+app.include_router(router)
 
-@app.get("/test-db")  #Debugging DB connection
+@app.get("/test-db")
 def test_db():
     try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT 1")
-        result = cursor.fetchone()
-        return {"status": "connected", "result": result[0]}
+        result = test_connection()
+        return {"status": "connected", "result": result}
     except Exception as e:
         return {"error": str(e)}

@@ -1,7 +1,6 @@
-import os
-import pyodbc
+from sqlalchemy import text
+from app.db.database import engine
 
-def get_connection():
-    conn_str = os.getenv("DB_CONNECTION")
-    conn = pyodbc.connect(conn_str)
-    return conn
+def test_connection():
+    with engine.connect() as conn:
+        return conn.execute(text("SELECT 1")).scalar()
