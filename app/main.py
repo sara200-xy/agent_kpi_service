@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from dbcnctn import get_connection
+from app.dbcnctn import get_connection
 from app.api.routes import router
 
 app.include_router(router)   #real endpoints
