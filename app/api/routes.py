@@ -1,37 +1,29 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 from app.services.tile_service import get_jobs_by_tile
 from app.services.kpi_service import get_kpi_status
 
 router = APIRouter()
 
-
-@router.get("/kpi-status")
-def fetch_kpi_status(
-    buildnumber: str,
-    tilename: str | None = None,
-    jobnames: str | None = Query(default=None)
+@router.get("/pipeline-kpi")
+def get_pipeline_kpi(
+    buildnumber: str = Query(...),
+    tilename: str = Query(...)
 ):
-    if tilename:
+    try:
         jobs = get_jobs_by_tile(tilename)
-    elif jobnames:
-        jobs = [j.strip() for j in jobnames.split(",") if j.strip()]
-    else:
-        # FastAPI will return 200 unless you raise; keeping simple:
-        return {"error": "Provide either tilename or jobnames."}
 
-    if not jobs:
+        if not jobs:
+            raise HTTPException(status_code=404, detail="No jobs found for tile")
+
+        kpi_data = get_kpi_status(buildnumber, jobs)
+
         return {
-            "tilename": tilename,
-            "buildnumber": buildnumber,
-            "jobnames": [],
-            "kpi": []
+            "buildNumber": buildnumber,
+            "tileName": tilename,
+            "jobs": kpi_data
         }
 
-    kpi_result = get_kpi_status(buildnumber, jobs)
-
-    return {
-        "tilename": tilename,
-        "buildnumber": buildnumber,
-        "jobnames": jobs,
-        "kpi": kpi_result
-    }
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
