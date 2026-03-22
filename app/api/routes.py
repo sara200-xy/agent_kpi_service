@@ -5,22 +5,33 @@ from app.services.kpi_service import get_kpi_status
 router = APIRouter()
 
 
-@router.get("/tiles/{tilename}/jobs")
-def fetch_jobs(tilename: str):
+@router.get("/kpi-status")
+def fetch_kpi_status(
+    buildnumber: str,
+    tilename: str | None = None,
+    jobnames: str | None = Query(default=None)
+):
+    if tilename:
+        jobs = get_jobs_by_tile(tilename)
+    elif jobnames:
+        jobs = [j.strip() for j in jobnames.split(",") if j.strip()]
+    else:
+        # FastAPI will return 200 unless you raise; keeping simple:
+        return {"error": "Provide either tilename or jobnames."}
 
-    jobs = get_jobs_by_tile(tilename)
+    if not jobs:
+        return {
+            "tilename": tilename,
+            "buildnumber": buildnumber,
+            "jobnames": [],
+            "kpi": []
+        }
+
+    kpi_result = get_kpi_status(buildnumber, jobs)
 
     return {
         "tilename": tilename,
-        "jobnames": jobs
+        "buildnumber": buildnumber,
+        "jobnames": jobs,
+        "kpi": kpi_result
     }
-
-
-@router.get("/kpi-status")
-def fetch_kpi_status(buildnumber: str, jobnames: str = Query(...)):
-
-    job_list = jobnames.split(",")
-
-    result = get_kpi_status(buildnumber, job_list)
-
-    return result
