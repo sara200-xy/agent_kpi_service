@@ -4,7 +4,7 @@ from fastapi.openapi.utils import get_openapi
 from app.api.routes import router
 from app.dbcnctn import test_connection
 
-APP_BASE_URL = "https://kpi-agent-service-sara-dehrgbfxcrbmcgck.eastus-01.azurewebsites.net.azurewebsites.net" 
+APP_BASE_URL = "https://kpi-agent-service-sara-dehrgbfxcrbmcgck.eastus-01.azurewebsites.net" 
 
 app = FastAPI(
     title="Pipeline KPI API",
